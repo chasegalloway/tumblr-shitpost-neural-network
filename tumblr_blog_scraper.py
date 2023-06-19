@@ -1,43 +1,39 @@
 import pytumblr
 import csv
-from unidecode import unidecode
 import calendar
 import time
 
 # Enter your Tumblr API key here:
 tumblr = pytumblr.TumblrRestClient('')
 
-# Set search parameters here:
-#
-# Tumblr's API only supports searching for a single blog at a time
-# Filter options are text, html, or raw
-# Before - only search for posts before this time - in seconds past the epoch
-# use calendar.timegm(time.gmtime()) to use the current epoch
 blog_url = ''  # Tumblr blog URL (e.g., example.tumblr.com)
 filter = 'text'
 before = calendar.timegm(time.gmtime())
 
-# Set output file here:
-outputPath = ''
+# Set output file paths
+csvFilePath = 'TumblrPosts-' + str(before) + '-' + blog_url + '.csv'
+textFilePath = 'TumblrPosts-' + str(before) + '-' + blog_url + '.txt'
 
-filePath = outputPath + 'TumblrPosts-' + str(before) + '-' + blog_url + '.csv'
-with open(filePath, mode='a', newline='', encoding='utf-8') as results_file:
+with open(csvFilePath, mode='a', newline='', encoding='utf-8') as results_file:
     results_writer = csv.writer(results_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
     results_writer.writerow(["timeStamp", "URL", "blogName", "title", "tags", "body"])
 
-print("Searching Tumblr for 100 posts from blog '" + blog_url + "'")
+print("Searching Tumblr for 300 posts from blog '" + blog_url + "'")
 
 j = 1
+post_bodies = []
+total_posts = 0
 
-# If you really wanted to, you could increase this number here to increase the number of batches
-# Tumblr's API limits you to 20 results at a time, but we can loop through the search multiple times
-# BUT I'd be cautious about making this number too big - to avoid running into API call limits
-
-while j < 5:
+while j < 16 and total_posts < 300:
     # Run the search and snag the results
     searchResults = tumblr.posts(blog_url, filter=filter, before=before, limit=20)
-    print("Batch " + str(j) + " of 5")
-    print(str(len(searchResults["posts"])) + " results retrieved")
+    print("Batch " + str(j) + " of 15")
+    num_results = len(searchResults["posts"])
+    print(str(num_results) + " results retrieved")
+
+    if num_results == 0:
+        break
+
     for post in searchResults["posts"]:
         blog_name = searchResults["blog"]["name"]
         date = post["date"]
@@ -57,13 +53,16 @@ while j < 5:
             body = "Couldn't Get Post Body"
 
         if body != "Couldn't Get Post Body":
-            with open(filePath, mode='a', newline='', encoding='utf-8') as results_file:
+            with open(csvFilePath, mode='a', newline='', encoding='utf-8') as results_file:
                 results_writer = csv.writer(results_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
                 try:
                     results_writer.writerow([date, url, blog_name, title, tags, body])
                     print("Successfully wrote row for post from " + date)
+                    total_posts += 1
                 except:
                     print("Error writing row")
+
+            post_bodies.append(body)
 
     # Next, we make note of the oldest timestamp
     oldestTime = post["timestamp"]
@@ -71,4 +70,11 @@ while j < 5:
     j = j + 1
 
 print("Finished!")
-print("Saved CSV to " + filePath)
+print("Saved CSV to " + csvFilePath)
+
+# Write post bodies to a text file
+with open(textFilePath, mode='w', encoding='utf-8') as text_file:
+    for body in post_bodies:
+        text_file.write(body + '\n')
+
+print("Saved post bodies to " + textFilePath)
