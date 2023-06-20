@@ -8,14 +8,14 @@ import pandas as pd
 import glob
 
 # Step 1: Data Collection and Preprocessing
-file_pattern = 'TumblrPosts-1687204101-pukicho.csv'  # Update the file pattern to match your CSV files
-all_files = glob.glob(file_pattern)
+# Read data from multiple CSV files
+file_pattern = 'TumblrPosts-1687204101-pukicho.csv'
+csv_files = glob.glob(file_pattern)
 
-# Read and combine data from multiple CSV files
-data = pd.concat((pd.read_csv(file)['body'] for file in all_files), ignore_index=True)
-
-# Preprocessing
-posts = data.tolist()
+posts = []
+for file in csv_files:
+    data = pd.read_csv(file)
+    posts.extend(data['body'].tolist())
 
 # Step 2: Tokenization and Sequence Generation
 tokenizer = Tokenizer()
