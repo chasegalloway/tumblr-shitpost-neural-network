@@ -4,9 +4,9 @@ import calendar
 import time
 
 # Enter your Tumblr API key here:
-tumblr = pytumblr.TumblrRestClient('493hhIxWArT3M9aEAXn9cIzDVpGEm0jpKOBS9Z7VKoe2njWgdY')
+tumblr = pytumblr.TumblrRestClient('')
 
-blog_url = 'atsignchase'  # Tumblr blog URL (e.g., example.tumblr.com)
+blog_url = ''  # Tumblr blog URL (e.g., example.tumblr.com)
 filter = 'text'
 before = calendar.timegm(time.gmtime())
 
