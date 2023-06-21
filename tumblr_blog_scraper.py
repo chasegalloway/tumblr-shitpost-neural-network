@@ -4,9 +4,9 @@ import calendar
 import time
 
 # Enter your Tumblr API key here:
-tumblr = pytumblr.TumblrRestClient('')
+tumblr = pytumblr.TumblrRestClient('493hhIxWArT3M9aEAXn9cIzDVpGEm0jpKOBS9Z7VKoe2njWgdY')
 
-blog_url = ''  # Tumblr blog URL (e.g., example.tumblr.com)
+blog_url = 'atsignchase'  # Tumblr blog URL (e.g., example.tumblr.com)
 filter = 'text'
 before = calendar.timegm(time.gmtime())
 
@@ -18,15 +18,22 @@ with open(csvFilePath, mode='a', newline='', encoding='utf-8') as results_file:
     results_writer = csv.writer(results_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
     results_writer.writerow(["timeStamp", "URL", "blogName", "title", "tags", "body"])
 
-print("Searching Tumblr for 300 posts from blog '" + blog_url + "'")
+print("Searching Tumblr for blog posts from '" + blog_url + "'")
+
+# Accept user input for the desired post count
+post_count = int(input("Enter the number of blog posts to scrape: "))
+remaining_posts = post_count
 
 j = 1
 post_bodies = []
 total_posts = 0
 
-while j < 16 and total_posts < 300:
+while j < 16 and remaining_posts > 0:
+    # Determine the number of posts to fetch in this batch
+    limit = min(remaining_posts, 20)
+
     # Run the search and snag the results
-    searchResults = tumblr.posts(blog_url, filter=filter, before=before, limit=20)
+    searchResults = tumblr.posts(blog_url, filter=filter, before=before, limit=limit)
     print("Batch " + str(j) + " of 15")
     num_results = len(searchResults["posts"])
     print(str(num_results) + " results retrieved")
@@ -53,26 +60,31 @@ while j < 16 and total_posts < 300:
             body = "Couldn't Get Post Body"
 
         if body != "Couldn't Get Post Body":
+            # Remove user's name from the beginning of the post body
+            if body.startswith(blog_name + ":"):
+                body = body[len(blog_name) + 1:].lstrip()
+
             with open(csvFilePath, mode='a', newline='', encoding='utf-8') as results_file:
                 results_writer = csv.writer(results_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
                 try:
                     results_writer.writerow([date, url, blog_name, title, tags, body])
                     print("Successfully wrote row for post from " + date)
                     total_posts += 1
+                    remaining_posts -= 1
+                    post_bodies.append(body)
                 except:
                     print("Error writing row")
 
-            post_bodies.append(body)
+        # Update the 'before' timestamp to fetch the next batch
+        oldestTime = post['timestamp']
+        before = oldestTime
 
-    # Next, we make note of the oldest timestamp
-    oldestTime = post["timestamp"]
-    before = oldestTime
-    j = j + 1
+    j += 1
 
-print("Finished!")
+print("Finished scraping " + str(total_posts) + " posts!")
 print("Saved CSV to " + csvFilePath)
 
-# Write post bodies to a text file
+# Save the post bodies to a text file
 with open(textFilePath, mode='w', encoding='utf-8') as text_file:
     for body in post_bodies:
         text_file.write(body + '\n')
