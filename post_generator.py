@@ -5,14 +5,11 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 import numpy as np
 import pickle
 
-# Step 1: Load the trained model
 model = load_model('tumblr_model.h5')
 
-# Step 2: Load the tokenizer
 with open('tokenizer.pickle', 'rb') as f:
     tokenizer = pickle.load(f)
 
-# Step 3: Generate a Tumblr post
 seed_text = input("Enter a few words to start the post: ")
 next_words = 5
 
