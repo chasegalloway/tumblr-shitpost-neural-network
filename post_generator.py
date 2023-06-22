@@ -17,20 +17,28 @@ seed_text = input("Enter a few words to start the post: ")
 # Maximum number of words to generate
 max_words = 20
 
+# Temperature parameter for text generation (higher values for more randomness, lower for more deterministic)
+temperature = 0.01
+
 # Generate the post
 for _ in range(max_words):
     token_list = tokenizer.texts_to_sequences([seed_text])[0]
     token_list = pad_sequences([token_list], maxlen=model.input_shape[1], padding='pre')
-    predicted = np.argmax(model.predict(token_list), axis=-1)
-    output_word = ""
-    for word, index in tokenizer.word_index.items():
-        if index == predicted:
-            output_word = word
-            break
+    predicted_probs = model.predict(token_list)[0]
+    predicted_probs = predicted_probs / np.sum(predicted_probs)  # Normalize the probabilities
+    predicted_probs = np.log(predicted_probs) / temperature
+    exp_preds = np.exp(predicted_probs)
+    predicted_probs = exp_preds / np.sum(exp_preds)
+    predicted_id = np.random.choice(len(predicted_probs), p=predicted_probs)
+    output_word = tokenizer.index_word[predicted_id]
+
     seed_text += " " + output_word
 
     # Check if the generated word indicates a logical end
     if any(ngram in seed_text for ngram in ngram_data):
+        # Trim the generated post to the last complete sentence
+        last_sentence = seed_text.rsplit('.', 1)[0] + '.'
+        seed_text = last_sentence
         break
 
 print("Generated Tumblr post:")

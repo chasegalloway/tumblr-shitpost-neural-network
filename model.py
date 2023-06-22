@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras.layers import LSTM, Dense, Embedding
+from tensorflow.keras.layers import LSTM, Dense, Embedding, Dropout, Bidirectional
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
@@ -37,7 +37,9 @@ y = input_sequences[:, -1]
 
 model = Sequential()
 model.add(Embedding(total_words, 100, input_length=max_sequence_len-1))
-model.add(LSTM(150))
+model.add(LSTM(150, return_sequences=True))  # Add the first LSTM layer with return_sequences=True
+model.add(Dropout(0.2))  # Add dropout after the first LSTM layer
+model.add(LSTM(150))  # Add the second LSTM layer
 model.add(Dense(total_words, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adam')
 
