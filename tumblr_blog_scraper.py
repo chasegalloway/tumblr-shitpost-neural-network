@@ -4,15 +4,14 @@ import calendar
 import time
 
 # Enter your Tumblr API key here:
-tumblr = pytumblr.TumblrRestClient('')
+tumblr = pytumblr.TumblrRestClient('493hhIxWArT3M9aEAXn9cIzDVpGEm0jpKOBS9Z7VKoe2njWgdY')
 
-blog_url = ''  # Tumblr blog URL (e.g., example.tumblr.com)
+blog_url = 'pukicho'  # Tumblr blog URL (e.g., example.tumblr.com)
 filter = 'text'
-before = calendar.timegm(time.gmtime())
 
 # Set output file paths
-csvFilePath = 'TumblrPosts-' + str(before) + '-' + blog_url + '.csv'
-textFilePath = 'TumblrPosts-' + str(before) + '-' + blog_url + '.txt'
+csvFilePath = 'TumblrPosts-' + blog_url + '.csv'
+textFilePath = 'TumblrPosts-' + blog_url + '.txt'
 
 with open(csvFilePath, mode='a', newline='', encoding='utf-8') as results_file:
     results_writer = csv.writer(results_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
@@ -20,21 +19,14 @@ with open(csvFilePath, mode='a', newline='', encoding='utf-8') as results_file:
 
 print("Searching Tumblr for blog posts from '" + blog_url + "'")
 
-# Accept user input for the desired post count
-post_count = int(input("Enter the number of blog posts to scrape: "))
-remaining_posts = post_count
-
-j = 1
-post_bodies = []
+# Fetch posts until there are no more left
+before = calendar.timegm(time.gmtime())
 total_posts = 0
+post_bodies = []
 
-while j < 16 and remaining_posts > 0:
-    # Determine the number of posts to fetch in this batch
-    limit = min(remaining_posts, 20)
-
+while True:
     # Run the search and snag the results
-    searchResults = tumblr.posts(blog_url, filter=filter, before=before, limit=limit)
-    print("Batch " + str(j) + " of 15")
+    searchResults = tumblr.posts(blog_url, filter=filter, before=before)
     num_results = len(searchResults["posts"])
     print(str(num_results) + " results retrieved")
 
@@ -70,7 +62,6 @@ while j < 16 and remaining_posts > 0:
                     results_writer.writerow([date, url, blog_name, title, tags, body])
                     print("Successfully wrote row for post from " + date)
                     total_posts += 1
-                    remaining_posts -= 1
                     post_bodies.append(body)
                 except:
                     print("Error writing row")
@@ -78,8 +69,6 @@ while j < 16 and remaining_posts > 0:
         # Update the 'before' timestamp to fetch the next batch
         oldestTime = post['timestamp']
         before = oldestTime
-
-    j += 1
 
 print("Finished scraping " + str(total_posts) + " posts!")
 print("Saved CSV to " + csvFilePath)
