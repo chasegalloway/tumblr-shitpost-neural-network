@@ -4,9 +4,9 @@ import calendar
 import time
 
 # Enter your Tumblr API keys here:
-api_keys = ['493hhIxWArT3M9aEAXn9cIzDVpGEm0jpKOBS9Z7VKoe2njWgdY', 'urcHPFKSHUEOvsBaEjvSSUZxeuQcUCN476wXRMtbVgAAHkViLT', '2VnKncAoHzmvZpeeUnr68BrfIVOl0QAoRalLBx8LamDh9YP9yb', 'tzTl7O9cmpJZMyCEKeyFti0jKszRd8KJeq0YBSUv03YFydSh69', 'OjEgh4dKzmg6D4gCUZrVFoqwr4HSp4j3x1e2awUmLUfbnypeKb']  # Add more keys as needed
+api_keys = ['']  # Add more keys as needed
 
-blog_url = 'pukicho'  # Tumblr blog URL (e.g., example.tumblr.com)
+blog_url = ''  # Tumblr blog URL (e.g., example.tumblr.com)
 filter = 'text'
 
 # Set output file paths

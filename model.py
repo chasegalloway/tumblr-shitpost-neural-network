@@ -1,14 +1,14 @@
 import tensorflow as tf
-from tensorflow.keras.layers import LSTM, Dense, Embedding, Dropout, Bidirectional
+from tensorflow.keras.layers import LSTM, Dense, Embedding, Dropout
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import numpy as np
-import json
 import pickle
+import random
 
 # Define a list of text files
-text_files = ['TumblrPosts-1687218509-pukicho.txt', 'TumblrPosts-1687235429-biggest-gaudiest-patronuses.txt', 'TumblrPosts-1687235947-atsignchase.txt']
+text_files = ['TumblrPosts-biggest-gaudiest-patronuses.txt', 'TumblrPosts-firefox-official.txt', 'TumblrPosts-pukicho.txt']
 
 posts = []
 for text_file in text_files:
@@ -16,12 +16,24 @@ for text_file in text_files:
         text_data = f.read()
         posts.extend(text_data.split('\n'))
 
+# Specify the percentage of the dataset to use
+percent_to_use = 0.8
+
+# Shuffle the posts
+random.shuffle(posts)
+
+# Determine the number of posts to use based on the specified percentage
+num_posts = int(len(posts) * percent_to_use)
+
+# Select the desired portion of posts
+selected_posts = posts[:num_posts]
+
 tokenizer = Tokenizer()
-tokenizer.fit_on_texts(posts)
+tokenizer.fit_on_texts(selected_posts)
 total_words = len(tokenizer.word_index) + 1
 
 input_sequences = []
-for post in posts:
+for post in selected_posts:
     token_list = tokenizer.texts_to_sequences([post])[0]
     for i in range(1, len(token_list)):
         n_gram_sequence = token_list[:i+1]
